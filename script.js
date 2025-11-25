@@ -366,3 +366,4 @@ boardElement.addEventListener('touchend', e => {
     touchendY = e.changedTouches[0].screenY;
     handleGesture();
 }, { passive: false });
+
