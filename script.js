@@ -343,4 +343,26 @@ function handleGesture() {
     setTimeout(() => {
         alert("Oyun Bitti! Skorunuz: " + score);
     }, 100); // Küçük bir gecikme ekleyerek skorun güncellenmesini sağlar
+
 }
+// Önceki Kod: boardElement.addEventListener('touchstart', e => { ... });
+// Önceki Kod: boardElement.addEventListener('touchend', e => { ... });
+
+// YENİ VE DÜZELTİLMİŞ KOD:
+const boardElement = document.getElementById("board");
+
+// Dokunma başladığında (parmak ekrana değdiğinde) koordinatları kaydet
+boardElement.addEventListener('touchstart', e => {
+    // Mobil cihazın varsayılan kaydırma hareketini engelle
+    e.preventDefault(); 
+    touchstartX = e.changedTouches[0].screenX;
+    touchstartY = e.changedTouches[0].screenY;
+}, { passive: false }); // passive: false ile e.preventDefault() çalışır hale gelir
+
+// Dokunma bittiğinde (parmak ekrandan çekildiğinde) koordinatları kaydet
+boardElement.addEventListener('touchend', e => {
+    e.preventDefault(); 
+    touchendX = e.changedTouches[0].screenX;
+    touchendY = e.changedTouches[0].screenY;
+    handleGesture();
+}, { passive: false });
