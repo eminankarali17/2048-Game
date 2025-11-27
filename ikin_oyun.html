@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Oyunu - Kareli Defter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4c3; /* Hafif sarımtırak defter rengi */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 { color: #333; margin-bottom: 10px; }
+        
+        .info-panel {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #555;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 40px); /* 10 Sütun */
+            grid-template-rows: repeat(10, 40px);    /* 10 Satır */
+            gap: 2px;
+            background-color: #90a4ae; /* Izgara çizgileri rengi */
+            padding: 5px;
+            border: 1px solid #78909c;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .cell {
+            background-color: #fff; /* Kare içi beyaz */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        /* Oynanabilir alanları ipucu olarak göstermek için (opsiyonel) */
+        .cell.valid-move {
+            background-color: #e0f7fa; /* Açık mavi */
+        }
+
+        .cell.filled {
+            background-color: #2c3e50;
+            color: white;
+            cursor: default;
+        }
+
+        .cell.current {
+            background-color: #e74c3c; /* Son oynanan kare kırmızı */
+            color: white;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover { background-color: #27ae60; }
+        
+        .back-link {
+            margin-top: 15px;
+            text-decoration: none;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>100 Oyunu</h1>
+    
+    <div class="info-panel">
+        <div>Şu anki Sayı: <span id="current-score" style="font-weight:bold; color:#e74c3c">1</span></div>
+        <div style="font-size: 12px; margin-top: 5px;">Yatay/Dikey: 2 boşluk atla | Çapraz: 1 boşluk atla</div>
+    </div>
+
+    <div id="game-board"></div>
+
+    <button onclick="resetGame()">Oyunu Sıfırla</button>
+    <a href="index.html" class="back-link">← Ana Menüye Dön</a>
+
+    <script>
+        const board = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('current-score');
+        
+        let grid = []; // 10x10'luk veri tutacağız
+        let currentNumber = 1;
+        let lastPosition = null; // {x: 0, y: 0} formatında
+        const gridSize = 10;
+
+        // Oyunu Başlat
+        function initGame() {
+            board.innerHTML = '';
+            grid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+            currentNumber = 1;
+            lastPosition = null;
+            scoreDisplay.innerText = "1";
+            
+            // Kareleri oluştur
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    cell.addEventListener('click', () => handleMove(x, y));
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        // Hamle Mantığı
+        function handleMove(x, y) {
+            // Eğer kare doluysa işlem yapma
+            if (grid[y][x] !== 0) return;
+
+            // İlk hamle mi yoksa geçerli bir hamle mi?
+            if (currentNumber === 1 || isValidMove(lastPosition.x, lastPosition.y, x, y)) {
+                
+                // Hamleyi işle
+                grid[y][x] = currentNumber;
+                
+                // Görsel güncelleme
+                updateVisuals(x, y);
+
+                lastPosition = { x, y };
+                currentNumber++;
+                scoreDisplay.innerText = currentNumber;
+
+                // Oyun bitti mi kontrolü
+                if (checkGameOver()) {
+                    setTimeout(() => {
+                        alert("Oyun Bitti! Skorunuz: " + (currentNumber - 1));
+                    }, 500);
+                }
+            }
+        }
+
+        // Kurallar: Yatay/Dikey 2 boşluk (mesafe 3), Çapraz 1 boşluk (mesafe 2)
+        function isValidMove(x1, y1, x2, y2) {
+            const dx = Math.abs(x1 - x2);
+            const dy = Math.abs(y1 - y2);
+
+            // Kural 1: Yatay veya Dikeyde arada 2 boşluk (yani 3 birim fark)
+            if ((dx === 3 && dy === 0) || (dx === 0 && dy === 3)) return true;
+
+            // Kural 2: Çaprazda arada 1 boşluk (yani 2 birim fark)
+            if (dx === 2 && dy === 2) return true;
+
+            return false;
+        }
+
+        function updateVisuals(x, y) {
+            const cells = document.querySelectorAll('.cell');
+            
+            // Önceki 'current' işaretini kaldır
+            cells.forEach(c => c.classList.remove('current'));
+
+            // Yeni basılan kareyi bul ve güncelle
+            const currentCell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+            currentCell.textContent = currentNumber;
+            currentCell.classList.add('filled', 'current');
+        }
+
+        // Oyunun bitip bitmediğini (yapılacak hamle kalıp kalmadığını) kontrol et
+        function checkGameOver() {
+            // Eğer daha yeni başladıysak oyun bitmemiştir
+            if (currentNumber === 1) return false;
+            
+            // 100'e ulaştıysa oyun biter (Kazanma)
+            if (currentNumber > 100) {
+                alert("Tebrikler! 100'e ulaştınız!");
+                return true;
+            }
+
+            // Tüm boş kareleri kontrol et, mevcut konumdan gidilebilecek yer var mı?
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (grid[y][x] === 0) { // Boş kare
+                        if (isValidMove(lastPosition.x, lastPosition.y, x, y)) {
+                            return false; // Hala geçerli bir hamle var
+                        }
+                    }
+                }
+            }
+            return true; // Hiçbir yere gidilemiyor
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Sayfa yüklenince başlat
+        initGame();
+
+    </script>
+</body>
+</html>
