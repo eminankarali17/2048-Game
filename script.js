@@ -388,15 +388,10 @@ gameContainer.addEventListener('touchend', function(event) {
 }, false);
 
 function handleGesture() {
-    function handleGesture() {
     alert("Test: Dokunma Algılandı!"); // <--- BU SATIRI EKLE
 
     // Ne kadar kaydırıldığını hesapla
     let deltaX = touchEndX - touchStartX;
-    // ... gerisi aynen kalsın
-    // Ne kadar kaydırıldığını hesapla
-    let deltaX = touchEndX - touchStartX;
-    let deltaY = touchEndY - touchStartY;
     
     // Yanlışlıkla dokunmaları engellemek için minimum mesafe
     if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) return;
@@ -439,4 +434,5 @@ function handleGesture() {
         checkGameOver();
     }
 }
+
 
