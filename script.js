@@ -364,4 +364,55 @@ boardElement.addEventListener('touchend', e => {
     touchendX = e.changedTouches[0].screenX;
     touchendY = e.changedTouches[0].screenY;
     handleGesture();
+
 }, { passive: false });
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+const gameContainer = document.querySelector('.game-container'); // Oyun kutunun sınıfı neyse onu yaz
+
+// 1. Dokunma Başladığında (Koordinatı al)
+gameContainer.addEventListener('touchstart', function(event) {
+    touchStartX = event.changedTouches[0].screenX;
+    touchStartY = event.changedTouches[0].screenY;
+}, false);
+
+// 2. Dokunma Bittiğinde (Yönü hesapla)
+gameContainer.addEventListener('touchend', function(event) {
+    touchEndX = event.changedTouches[0].screenX;
+    touchEndY = event.changedTouches[0].screenY;
+    
+    handleGesture(); // Hareketi işle
+}, false);
+
+function handleGesture() {
+    // Ne kadar kaydırıldığını hesapla
+    let deltaX = touchEndX - touchStartX;
+    let deltaY = touchEndY - touchStartY;
+    
+    // Yanlışlıkla dokunmaları engellemek için minimum mesafe (threshold)
+    if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) return;
+
+    // Yatay mı Dikey mi daha çok kaydırıldı?
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // YATAY HAREKET
+        if (deltaX > 0) {
+            // Sağa Kaydırma
+            if(typeof moveRight === 'function') moveRight(); 
+        } else {
+            // Sola Kaydırma
+            if(typeof moveLeft === 'function') moveLeft();
+        }
+    } else {
+        // DİKEY HAREKET
+        if (deltaY > 0) {
+            // Aşağı Kaydırma
+            if(typeof moveDown === 'function') moveDown();
+        } else {
+            // Yukarı Kaydırma
+            if(typeof moveUp === 'function') moveUp();
+        }
+    }
+}
