@@ -392,27 +392,44 @@ function handleGesture() {
     let deltaX = touchEndX - touchStartX;
     let deltaY = touchEndY - touchStartY;
     
-    // Yanlışlıkla dokunmaları engellemek için minimum mesafe (threshold)
+    // Yanlışlıkla dokunmaları engellemek için minimum mesafe
     if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) return;
 
-    // Yatay mı Dikey mi daha çok kaydırıldı?
+    let moved = false; // Hareket oldu mu kontrolü
+
+    // Yatay mı Dikey mi?
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
         // YATAY HAREKET
         if (deltaX > 0) {
-            // Sağa Kaydırma
-            if(typeof moveRight === 'function') moveRight(); 
+            // Sağa Kaydırma (slideRight kullanıyoruz)
+            if(typeof slideRight === 'function') {
+                moved = slideRight(); 
+            }
         } else {
-            // Sola Kaydırma
-            if(typeof moveLeft === 'function') moveLeft();
+            // Sola Kaydırma (slideLeft kullanıyoruz)
+            if(typeof slideLeft === 'function') {
+                moved = slideLeft();
+            }
         }
     } else {
         // DİKEY HAREKET
         if (deltaY > 0) {
-            // Aşağı Kaydırma
-            if(typeof moveDown === 'function') moveDown();
+            // Aşağı Kaydırma (slideDown kullanıyoruz)
+            if(typeof slideDown === 'function') {
+                moved = slideDown();
+            }
         } else {
-            // Yukarı Kaydırma
-            if(typeof moveUp === 'function') moveUp();
+            // Yukarı Kaydırma (slideUp kullanıyoruz)
+            if(typeof slideUp === 'function') {
+                moved = slideUp();
+            }
         }
+    }
+
+    // FOTOĞRAFTAKİ MANTIK BURADA:
+    // Eğer taşlar hareket ettiyse yeni taş ekle ve oyun bitti mi bak
+    if (moved) {
+        addTile();
+        checkGameOver();
     }
 }
